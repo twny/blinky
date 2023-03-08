@@ -5,7 +5,7 @@ use arduino_hal::port::mode::Output;
 use arduino_hal::port::{Pin, PinOps};
 use panic_halt as _;
 
-const MAX_ON: u32 = 20000;
+const MAX_ON: u32 = 10000;
 #[arduino_hal::entry]
 fn main() -> ! {
     let dp = arduino_hal::Peripherals::take().unwrap();
@@ -18,10 +18,15 @@ fn main() -> ! {
     }
 }
 
+// duty cycle % = on_time / (on_time + off_time) * 100
+
+// duty cycle the duration the light is on (on_time)
+// brightness increases as the delay decreases (off_time)
+
 // fn breathe_in(led: &mut PB5<Output>) {
 fn breathe_in<T: PinOps>(led: &mut Pin<Output, T>) {
-    let mut on_time = 1000;
-    let mut off_time = 20000;
+    let mut on_time = 50;
+    let mut off_time = 10000;
     loop {
         led.toggle();
         arduino_hal::delay_us(on_time);
@@ -30,14 +35,14 @@ fn breathe_in<T: PinOps>(led: &mut Pin<Output, T>) {
         if on_time == MAX_ON {
             break;
         }
-        on_time += 1000;
-        off_time -= 1000;
+        on_time += 50;
+        off_time -= 50;
     }
 }
 
 fn breathe_out<T: PinOps>(led: &mut Pin<Output, T>) {
-    let mut on_time = 20000;
-    let mut off_time = 1000;
+    let mut on_time = 10000;
+    let mut off_time = 50;
     loop {
         led.toggle();
         arduino_hal::delay_us(on_time);
@@ -46,7 +51,7 @@ fn breathe_out<T: PinOps>(led: &mut Pin<Output, T>) {
         if off_time == MAX_ON {
             break;
         }
-        on_time -= 1000;
-        off_time += 1000;
+        on_time -= 50;
+        off_time += 50;
     }
 }
