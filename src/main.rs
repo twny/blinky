@@ -6,7 +6,6 @@ use arduino_hal::port::{Pin, PinOps};
 use panic_halt as _;
 
 const MAX_ON: u32 = 20000;
-const MIN_OFF: u32 = 1000;
 #[arduino_hal::entry]
 fn main() -> ! {
     let dp = arduino_hal::Peripherals::take().unwrap();
@@ -44,7 +43,7 @@ fn breathe_out<T: PinOps>(led: &mut Pin<Output, T>) {
         arduino_hal::delay_us(on_time);
         led.toggle();
         arduino_hal::delay_us(off_time);
-        if off_time == MIN_OFF {
+        if off_time == MAX_ON {
             break;
         }
         on_time -= 1000;
