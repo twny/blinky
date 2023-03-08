@@ -1,27 +1,53 @@
 #![no_std]
 #![no_main]
 
+use arduino_hal::port::mode::Output;
+use arduino_hal::port::{Pin, PinOps};
 use panic_halt as _;
 
+const MAX_ON: u32 = 20000;
+const MIN_OFF: u32 = 1000;
 #[arduino_hal::entry]
 fn main() -> ! {
     let dp = arduino_hal::Peripherals::take().unwrap();
     let pins = arduino_hal::pins!(dp);
 
-    /*
-     * For examples (and inspiration), head to
-     *
-     *     https://github.com/Rahix/avr-hal/tree/main/examples
-     *
-     * NOTE: Not all examples were ported to all boards!  There is a good chance though, that code
-     * for a different board can be adapted for yours.  The Arduino Uno currently has the most
-     * examples available.
-     */
-
     let mut led = pins.d13.into_output();
+    loop {
+        breathe_in(&mut led);
+        breathe_out(&mut led);
+    }
+}
 
+// fn breathe_in(led: &mut PB5<Output>) {
+fn breathe_in<T: PinOps>(led: &mut Pin<Output, T>) {
+    let mut on_time = 1000;
+    let mut off_time = 20000;
     loop {
         led.toggle();
-        arduino_hal::delay_ms(1000);
+        arduino_hal::delay_us(on_time);
+        led.toggle();
+        arduino_hal::delay_us(off_time);
+        if on_time == MAX_ON {
+            break;
+        }
+        on_time += 1000;
+        off_time -= 1000;
+    }
+}
+
+fn breathe_out<T: PinOps>(led: &mut Pin<Output, T>) {
+    let mut on_time = 20000;
+    let mut off_time = 1000;
+    loop {
+        led.toggle();
+        arduino_hal::delay_us(on_time);
+        led.toggle();
+        arduino_hal::delay_us(off_time);
+        if off_time == MIN_OFF {
+            break;
+        }
+        on_time -= 1000;
+        off_time += 1000;
     }
 }
